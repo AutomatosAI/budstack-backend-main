@@ -232,11 +232,17 @@ export class StrainService {
       });
 
       // Transform imageUrl to full S3 URLs
-      const strainsWithUrls = strains.map((strain) => ({
+      const strainsWithUrls = strains.map((strain: any) => ({
         ...strain,
         imageUrl: strain.imageUrl
           ? `${CONSTANT.S3_BUCKET_BASE_URL}${strain.imageUrl}`
           : null,
+        strainImages: strain.strainImages?.map((img) => ({
+          ...img,
+          strainImageUrl: img.strainImageUrl
+            ? `${CONSTANT.S3_BUCKET_BASE_URL}${img.strainImageUrl}`
+            : null,
+        })),
       }));
 
       return {
@@ -417,7 +423,8 @@ export class StrainService {
         },
       });
 
-      if (!strain) {
+      const strainWithAny: any = strain; // Cast to avoid TS errors
+      if (!strainWithAny) {
         throw new Error(MESSAGES.ERROR.STRAIN.NOT_FOUND);
       }
       if (countryCode) {
@@ -425,18 +432,27 @@ export class StrainService {
           isAvailable = false,
           isActive = false,
           stockQuantity = 0,
-        } = strain.strainLocations[0] || {};
-        strain.isAvailable = isAvailable;
-        strain.isActive = isActive;
-        strain.stockQuantity = stockQuantity;
+        } = strainWithAny.strainLocations[0] || {};
+        strainWithAny.isAvailable = isAvailable;
+        strainWithAny.isActive = isActive;
+        strainWithAny.stockQuantity = stockQuantity;
       }
 
       // Transform imageUrl to full S3 URL
-      if (strain.imageUrl) {
-        strain.imageUrl = `${CONSTANT.S3_BUCKET_BASE_URL}${strain.imageUrl}`;
+      if (strainWithAny.imageUrl) {
+        strainWithAny.imageUrl = `${CONSTANT.S3_BUCKET_BASE_URL}${strainWithAny.imageUrl}`;
       }
 
-      return strain;
+      if (strainWithAny.strainImages) {
+        strainWithAny.strainImages = strainWithAny.strainImages.map((img) => ({
+          ...img,
+          strainImageUrl: img.strainImageUrl
+            ? `${CONSTANT.S3_BUCKET_BASE_URL}${img.strainImageUrl}`
+            : null,
+        }));
+      }
+
+      return strainWithAny;
     } catch (error) {
       this.logger.error(error);
       throw error;
