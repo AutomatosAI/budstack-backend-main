@@ -204,6 +204,9 @@ export class StrainService {
           popularity: true,
           flavour: true,
           imageUrl: true,
+          isAvailable: true,
+          isActive: true,
+          stockQuantity: true,
           prices: {
             select: {
               currency: true,
