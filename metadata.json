@@ -1,0 +1,22 @@
+{
+    "traits": {
+        "0x636c69656e74436f756e74000000000000000000000000000000000000000000": {
+            "displayName": "client count",
+            "dataType": {
+                "type": "string"
+            }
+        },
+        "0x7478436f756e7400000000000000000000000000000000000000000000000000": {
+            "displayName": "tx count",
+            "dataType": {
+                "type": "string"
+            }
+        },
+        "0x7478566f6c756d65000000000000000000000000000000000000000000000000": {
+            "displayName": "tx volume",
+            "dataType": {
+                "type": "string"
+            }
+        }
+    }
+}

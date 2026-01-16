@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "NftTransactions" ALTER COLUMN "price" SET DATA TYPE DOUBLE PRECISION;

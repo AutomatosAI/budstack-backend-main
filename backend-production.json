@@ -1,0 +1,208 @@
+{
+    "family": "backend-prod-env",
+    "containerDefinitions": [
+      {
+        "name": "backend-prod-container",
+        "image": "992382608811.dkr.ecr.us-east-1.amazonaws.com/backend_production:latest",
+        "cpu": 2048,
+        "memory": 4096,
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "/ecs/backend-prod-env",
+            "awslogs-region": "us-east-1",
+            "awslogs-create-group": "true",
+            "awslogs-stream-prefix": "ecs"
+          }
+        },
+        
+        "portMappings": [
+          {
+            "containerPort": 3000,
+            "protocol": "tcp"
+          }
+        ],
+        "essential": true,
+        "environment": [
+          {
+            "name": "NODE_ENV",
+            "value": "staging"
+          }
+        ],
+        "secrets": [
+          {
+            "name": "PROD_PORT",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_PORT"
+          },
+          {
+            "name": "PROD_DATABASE_URL",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_DATABASE_URL"
+          },
+          {
+            "name": "PROD_AWS_BUCKET_NAME",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_AWS_BUCKET_NAME"
+          },
+          {
+            "name": "PROD_AWS_ACCESS_KEY_ID",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_AWS_ACCESS_KEY_ID"
+          },
+          {
+            "name": "PROD_AWS_SECRET_ACCESS_KEY",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_AWS_SECRET_ACCESS_KEY"
+          },
+          {
+            "name": "PROD_AWS_REGION",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_AWS_REGION"
+          },
+          {
+            "name": "PROD_SENDGRID_API_KEY",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_SENDGRID_API_KEY"
+          },
+          {
+            "name": "PROD_ADMIN_EMAIL",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_ADMIN_EMAIL"
+          },
+          {
+            "name": "PROD_FRONTEND_URL",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_FRONTEND_URL"
+          },
+          {
+            "name": "PROD_JWT_SECRET_LOGIN",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_JWT_SECRET_LOGIN"
+          },
+          {
+            "name": "PROD_JWT_SECRET_VERIFY_EMAIL",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_JWT_SECRET_VERIFY_EMAIL"
+          },
+          {
+            "name": "PROD_JWT_SECRET_2FA",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_JWT_SECRET_2FA"
+          },
+          {
+            "name": "PROD_NFT_CONTRACT_ID",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_NFT_CONTRACT_ID"
+          },
+          {
+            "name": "PROD_NFT_MARKETPLACE_CONTRACT_NAME",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_NFT_MARKETPLACE_CONTRACT_NAME"
+          },
+          {
+            "name": "PROD_NFT_MARKETPLACE_CONTRACT_ID",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_NFT_MARKETPLACE_CONTRACT_ID"
+          },
+          {
+            "name": "PROD_CONTRACT_DEPLOYED_CHAIN_ID",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_CONTRACT_DEPLOYED_CHAIN_ID"
+          },
+          {
+            "name": "PROD_RPC_PROVIDER_URL",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_RPC_PROVIDER_URL"
+          },
+          {
+            "name": "PROD_KYC_CLIENT_ID",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_KYC_CLIENT_ID"
+          },
+          {
+            "name": "PROD_KYC_CLIENT_SECRET",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_KYC_CLIENT_SECRET"
+          },
+          {
+            "name": "PROD_KYC_AUDIENCE",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_KYC_AUDIENCE"
+          },
+          {
+            "name": "PROD_KYC_GRANT_TYPE",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_KYC_GRANT_TYPE"
+          },
+          {
+            "name": "PROD_KYC_BASE_URL",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_KYC_BASE_URL"
+          },
+          {
+            "name": "PROD_KYC_ORGANIZATION_ID",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_KYC_ORGANIZATION_ID"
+          },
+          {
+            "name": "PROD_KYC_WEBHOOK_SECRET",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_KYC_WEBHOOK_SECRET"
+          },
+          {
+            "name": "PROD_FIREBASE_CLIENT_EMAIL",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_FIREBASE_CLIENT_EMAIL"
+          },
+          {
+            "name": "PROD_FIREBASE_PROJECT_ID",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_FIREBASE_PROJECT_ID"
+          },
+          {
+            "name": "PROD_FIREBASE_PRIVATE_KEY",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_FIREBASE_PRIVATE_KEY"
+          },
+          {
+            "name": "PROD_FIREBASE_NOTIFICATION_IMAGE_URL",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_FIREBASE_NOTIFICATION_IMAGE_URL"
+          },
+          {
+            "name": "PROD_COIN_REMITTER_INVOICE_URL",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_COIN_REMITTER_INVOICE_URL"
+          },
+          {
+            "name": "PROD_COIN_REMITTER_TEST_API_KEY",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_COIN_REMITTER_TEST_API_KEY"
+          },
+          {
+            "name": "PROD_COIN_REMITTER_TEST_PASSWORD",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_COIN_REMITTER_TEST_PASSWORD"
+          },
+          {
+            "name": "PROD_COIN_REMITTER_USDT_API_KEY",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_COIN_REMITTER_USDT_API_KEY"
+          },
+          {
+            "name": "PROD_COIN_REMITTER_USDT_PASSWORD",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_COIN_REMITTER_USDT_PASSWORD"
+          },
+          {
+            "name": "PROD_COIN_REMITTER_ETH_API_KEY",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_COIN_REMITTER_ETH_API_KEY"
+          },
+          {
+            "name": "PROD_COIN_REMITTER_ETH_PASSWORD",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_COIN_REMITTER_ETH_PASSWORD"
+          },
+          {
+            "name": "PROD_COIN_REMITTER_BTC_API_KEY",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_COIN_REMITTER_BTC_API_KEY"
+          },
+          {
+            "name": "PROD_COIN_REMITTER_BTC_PASSWORD",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_COIN_REMITTER_BTC_PASSWORD"
+          },
+          {
+            "name": "PROD_PAYINN_API_KEY",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_PAYINN_API_KEY"
+          },
+          {
+            "name": "PROD_PAYINN_API_URL",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_PAYINN_API_URL"
+          },
+          {
+            "name": "PROD_SUPPORT_ADMIN_EMAIL",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_SUPPORT_ADMIN_EMAIL"
+          },  
+          {
+            "name": "PROD_NETWORK",
+            "valueFrom": "arn:aws:ssm:us-east-1:992382608811:parameter/PROD_NETWORK"
+          }  
+        ]
+      }
+    ],
+    "executionRoleArn": "arn:aws:iam::992382608811:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "runtimePlatform": {
+      "operatingSystemFamily": "LINUX"
+    },
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "2048",
+    "memory": "4096"
+  }

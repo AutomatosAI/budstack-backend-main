@@ -1,0 +1,1724 @@
+﻿schema {
+  query: Query
+  mutation: Mutation
+}
+
+interface IValidationError {
+  message: String!
+  fieldPath: [String!]!
+}
+
+interface RiskSubmissionAnswer {
+  question: String!
+  comment: String
+  notApplicable: Boolean!
+}
+
+interface ScoredRiskSubmissionAnswer implements RiskSubmissionAnswer {
+  score: Int
+  question: String!
+  comment: String
+  notApplicable: Boolean!
+}
+
+type AddEntityDocumentFileResult {
+  file: DocumentInformation!
+  uploadUrl: URL!
+}
+
+type AddIndividualDocumentFileResult {
+  file: IndividualDocumentFile!
+  uploadUrl: URL!
+}
+
+type Address {
+  "Line 1 of the address"
+  address1: String
+  "Line 2 of the address"
+  address2: String
+  city: String
+  region: String
+  postCode: String
+  country: CountryInformation
+}
+
+type AmlProfile {
+  "Description of the captured activity"
+  capturedActivity: String
+  "Description of the purpose of the activity"
+  purpose: String
+  "Description of the nature of the activity"
+  nature: String
+  cddLevel: CddLevel
+  riskAssessment: RiskAssessment
+  "Value of the transaction"
+  transactionValue: Decimal
+}
+
+type ApiClientMetadata {
+  "The list of organizations the currently authenticated API client can access"
+  accessibleOrganizations: [Organization!]!
+  "The unique identifier of the currently authenticated API client"
+  apiClientId: String!
+  "The set of scopes granted to the current API client"
+  scopes: [String!]!
+  "Friendly name associated with the API client (displayed in activity logs and other places where the API client makes changes to data)"
+  friendlyApiClientName: String
+}
+
+type CaseDetails {
+  caseRequestor: ContactInfo
+  caseLead: ContactInfo
+}
+
+type CaseDocumentInformation {
+  "Type of the document"
+  type: CaseDocumentType!
+  "Unique identifier for the document"
+  documentId: String!
+  "The individual files that support this document"
+  files: [DocumentInformation!]!
+}
+
+type CaseEntity {
+  "Unique identifier of the entity"
+  entityId: String!
+  "Type of the entity"
+  entityType: EntityType
+  "Legal name of the entity"
+  legalName: String
+  "The legal unique identifier for this entity. e.g. for a NZ company this would be the NZ company number"
+  identifier: String
+  "Notes about this entity (notes may include html formatting)"
+  notes: String
+  "Notes about the source of wealth (notes may include html formatting)"
+  sourceOfWealthNotes: String
+  "Address details of the entity"
+  address: Address
+  "The country the entity is registered in"
+  registeredCountry: CountryInformation
+  "The registration authority the entity is registered in"
+  registrationAuthorityCode: RegistrationAuthorityCode
+  documents: [EntityDocumentInformation!]!
+  verificationCheckStatus: EntityVerificationStatus!
+  exception: EntityExceptionDetails
+  "The urls to First AML applications for the entity"
+  urls: EntityUrls!
+  "The most recent verification report available for the entity"
+  latestVerificationReport: EntityVerificationReport
+}
+
+type CaseIndividual {
+  "Unique identifier of an individual"
+  individualId: String!
+  "Date of birth of the individual"
+  dateOfBirth: Date
+  "Preferred name of the individual"
+  preferredName: PersonName!
+  "Legal name of the individual"
+  legalName: PersonName!
+  "Email address of the individual"
+  emailAddress: String
+  "Phone number of the individual"
+  phoneNumber: String
+  "Phone number of the individual in E.164 format"
+  standardizedPhoneNumber: String
+  "Does this individual require CDD"
+  requiresCDD: Boolean!
+  "Is this individual a contact for the case?"
+  isCaseContact: Boolean!
+  "Address details of the individual"
+  address: Address!
+  "Notes about this individual (notes may include html formatting)"
+  notes: String
+  "The country of citizenship for this individual"
+  citizenship: CountryInformation
+  "The status of verifications for this individual"
+  individualVerificationChecksStatus: IndividualVerificationCheckStatus!
+  "The documents associated with this individual"
+  documents: [IndividualDocumentInformation!]!
+  "The exception associated with this individual and case"
+  exception: IndividualExceptionDetails
+  "Notes about the individual's source of wealth (notes may include html formatting)"
+  sourceOfWealthNotes: String
+  "The urls to First AML applications for the individual"
+  urls: IndividualUrls!
+  "The most recent verification report available for the individual"
+  latestVerificationReport: IndividualVerificationReport
+  "The verification type for this individual"
+  individualVerificationType: IndividualVerificationType!
+}
+
+type CaseInformation {
+  caseId: String!
+  name: String
+  caseStatus: CaseStatus!
+  organization: Organization!
+  office: Office
+  lastUpdatedOn: DateTime!
+  createdOn: DateTime!
+  timeReceived: DateTime!
+  reference: String
+  notes: String
+  caseType: CaseType!
+  amlProfile: AmlProfile!
+  "Case details for this case"
+  caseDetails: CaseDetails!
+  "The list of documents associated directly to the case"
+  documents: [CaseDocumentInformation!]!
+  "The list of individuals in this case"
+  individuals: [CaseIndividual!]!
+  "The list of entities in this case"
+  entities: [CaseEntity!]!
+  "Entity and individual relationships for this case"
+  entityStructure: EntityStructure!
+  "The urls to First AML applications for the case"
+  urls: CaseUrls!
+  riskAssessmentSubmission: RiskSubmission
+  "The users assigned to the case"
+  assignedUsers: [User!]!
+  "The pdf documents associated with the case"
+  pdfs: [GeneratedPdfInformation!]!
+  "The verification type for this case"
+  individualVerificationType: IndividualVerificationType!
+}
+
+type CaseUrls {
+  "The url to view the details for this case"
+  view: URL!
+}
+
+type ContactInfo {
+  fullName: String
+  emailAddress: String
+}
+
+"Describes a controlling interest relationship between two entities"
+type ControllingEntityRelationship {
+  "Unique identifier of the entity in the relationship"
+  entityId: String!
+  "Unique identifier of the parent entity in the relationship"
+  parentEntityId: String!
+}
+
+"Describes an individuals controlling relationship in an entity"
+type ControllingIndividualEntityRelationship {
+  "Unique identifier of the entity in the relationship"
+  entityId: String!
+  "Unique identifier of the individual in the relationship"
+  individualId: String!
+  "Type of controlling relationship"
+  controllingRelationshipType: ControllingRelationshipType
+}
+
+"Identifying information for a country"
+type CountryInformation {
+  CCA2: String!
+}
+
+type DocumentField {
+  name: String!
+  value: String
+  type: DocumentFieldType!
+}
+
+"Details of a document"
+type DocumentInformation {
+  "Unique identifier for the document"
+  documentId: String! @deprecated(reason: "Please use documentId on the parent object")
+  "The id for the file"
+  fileId: String
+  "File extension (including leading period '.')"
+  fileExtension: String
+  "Title of the file (without file extension"
+  fileTitle: String!
+  "Url of the document contents to retrieve via GET request (requires authentication)"
+  contentsUrl: URL
+}
+
+type EntityDocumentInformation {
+  "Type of the document"
+  type: EntityDocumentType!
+  "The individual files that support this document"
+  files: [DocumentInformation!]!
+  "Unique identifier for the document"
+  documentId: String!
+  "The fields related to the specific document type (if any)"
+  fields: [DocumentField!]!
+  title: String!
+}
+
+type EntityExceptionDetails {
+  "The reason given for adding the exception"
+  reason: String!
+  "The user display name who added the exception into the platform"
+  addedByDisplayName: String
+  "The client full name who approved of adding the exception"
+  approvedByFullName: String
+  "To indicate whether the exception has supporting documents or not"
+  hasSupportingDocuments: Boolean!
+  "The date time the exception was created on."
+  createdOn: DateTime!
+  "The date time the exception was updated on."
+  updatedOn: DateTime!
+  "Type of exception"
+  exceptionType: ExceptionType!
+  "Whether the exception is resolved or not"
+  isResolved: Boolean!
+  "The user display name who resolved the exception"
+  resolvedByName: String
+}
+
+type EntityStructure {
+  entityRelationships: [EntityRelationship!]!
+  "The relationships this individual has to the entities in this case"
+  individualEntityRelationships: [IndividualEntityRelationship!]!
+}
+
+type EntityUrls {
+  "The url to view the details for this case"
+  view: URL!
+}
+
+type EntityVerificationReport {
+  "Result of sanctions checks for the entity"
+  sanctions: ScreeningResult!
+  "When the verification report was generated"
+  generatedOn: DateTime!
+}
+
+type EntityVerificationStatus {
+  overall: VerificationStatus!
+  sanctions: ScreeningStatus!
+  adverseMedia: ScreeningStatus!
+}
+
+type GeneratedPdfInformation {
+  status: GeneratedPdfStatus!
+  id: Int!
+  url: String
+  type: PdfType!
+}
+
+type IndividualDocumentFile {
+  "The file id"
+  fileId: String!
+  "The type of document file e.g. front or back image of a drivers license"
+  fileType: IndividualDocumentFileType!
+  "Unique identifier for the document"
+  documentId: String! @deprecated(reason: "Please use documentId on IndividualDocumentInformation")
+  "File extension (including leading period '.')"
+  fileExtension: String!
+  "Title of the file (without file extension"
+  fileTitle: String!
+  "Url of the document contents to retrieve via GET request (requires authentication)"
+  contentsUrl: URL!
+}
+
+type IndividualDocumentInformation {
+  "Unique identifier for the document"
+  documentId: String!
+  "Title of the document"
+  title: String!
+  "Type of the document"
+  type: IndividualDocumentType!
+  "Country of origin for the individual document"
+  country: CountryInformation
+  "Regional variant of a document e.g. short-form State code in Australia"
+  regionalVariant: String
+  "Country of issue for the individual document - not currently populated"
+  countryOfIssue: CountryInformation
+  "The individual files that support this document - may include front and back-side images of a card for instance"
+  files: [IndividualDocumentFile!]!
+  "Identity number from the document (passport or drivers license number for instance)"
+  number: String
+  "The expiration date of the document"
+  expiryDate: Date
+  "The version number of the document (if present on the drivers license or identity card etc.)"
+  versionNumber: String
+  "The gender reported on the identity document (if any)"
+  gender: Gender
+  "The fields related to the specific document type (if any)"
+  fields: [DocumentField!]!
+}
+
+type IndividualExceptionDetails {
+  "The reason given for adding the exception"
+  reason: String!
+  "The user display name who added the exception into the platform"
+  addedByDisplayName: String
+  "The client full name who approved of adding the exception"
+  approvedByFullName: String
+  "To indicate whether the exception has supporting documents or not"
+  hasSupportingDocuments: Boolean!
+  "The date time the exception was created on."
+  createdOn: DateTime!
+  "The date time the exception was updated on."
+  updatedOn: DateTime!
+  "Type of exception"
+  exceptionType: ExceptionType!
+  "Whether the exception is resolved or not"
+  isResolved: Boolean!
+  "The user display name who resolved the exception"
+  resolvedByName: String
+}
+
+type IndividualUrls {
+  "The url to verify the individual for this case"
+  verification(embedded: Boolean! = false): UrlResultType!
+  "The url to view the individual for this case"
+  view: URL!
+}
+
+type IndividualVerificationCheckStatus {
+  legalName: VerificationStatus!
+  dateOfBirth: VerificationStatus!
+  address: VerificationStatus!
+  pep: ScreeningStatus!
+  sanctions: ScreeningStatus!
+  adverseMedia: ScreeningStatus!
+  overall: VerificationStatus!
+  dateVerified: DateTime
+}
+
+type IndividualVerificationReport {
+  "Results of checks against the individuals full name"
+  fullName: VerificationResult!
+  "Results of checks against the individuals date of birth"
+  dateOfBrith: VerificationResult!
+  "Results of the Government ID check for the individual"
+  governmentId: VerificationResult!
+  "Results of checks against the individuals address"
+  address: VerificationResult!
+  "Results of the anti-tampering checks for the individual"
+  antiTampering: DocumentVerificationResult!
+  "Results of biometrics checks for the individual"
+  biometric: BiometricVerificationResult!
+  "Result of PEP (Politically Exposed Person) checks for the individual"
+  pep: ScreeningResult!
+  "Result of sanctions checks for the individual"
+  sanctions: ScreeningResult!
+  "When the verification report was generated"
+  generatedOn: DateTime!
+}
+
+type IndividualVerificationType {
+  verificationTypeId: Int!
+  name: String!
+}
+
+type InvalidUrl {
+  "Details when a url for the requested action cannot be provided"
+  message: String!
+}
+
+"Returned with a value exceeds the max allowable length"
+type MaxLengthValidationError implements IValidationError {
+  message: String!
+  fieldPath: [String!]!
+  maxLength: Int!
+}
+
+"Returned with a value exceeds the min allowable length"
+type MinLengthValidationError implements IValidationError {
+  message: String!
+  fieldPath: [String!]!
+  minLength: Int!
+}
+
+type Mutation @authorize {
+  "Create a new case"
+  createCase(input: CreateCaseInput!): CreateCaseResult! @authorize(policy: "CaseManagement")
+  "Create a new case for verifying individuals"
+  createCaseForIndividuals(input: CreateCaseForIndividualsInput!): CreateCaseResult @authorize(policy: "CaseManagement")
+  "Create a new lite case for verifying an individual"
+  createLiteCase(input: CreateLiteCaseInput!): CreateCaseResult @authorize(policy: "CaseManagement")
+  "Create a new case for verifying entities"
+  createCaseForEntities(input: CreateCaseForEntitiesInput!): CreateCaseResult @authorize(policy: "CaseManagement")
+  "Create a new case for verifying an existing entity"
+  createCaseForExistingEntity(input: CreateCaseForExistingEntityInput!): CreateCaseResult @authorize(policy: "CaseManagement")
+  "Escalates a ready for review or abandoned lite case and creates a standard case"
+  escalateLiteCase(input: EscalateLiteCaseInput!): CreateCaseResult @authorize(policy: "CaseManagement")
+  "Update the client-assigned reference for an existing case"
+  updateCaseReference(input: UpdateCaseReferenceInput!): UpdateCaseResult @authorize(policy: "CaseManagement")
+  "Add new note to case which is visible to the First AML team"
+  addCaseNote(input: AddCaseNoteInput!): UpdateCaseResult @authorize(policy: "CaseManagement")
+  "Add one or more additional individuals to an existing case that require verification"
+  addIndividualsToCase(input: AddIndividualsToCaseInput!): UpdateCaseResult @authorize(policy: "CaseManagement")
+  "Add an exception for an individual for a specific case"
+  addExceptionForCaseIndividual(input: AddExceptionForCaseIndividualInput!): UpdateCaseResult @authorize(policy: "CaseManagement")
+  "Update an exception for an individual for a specific case"
+  updateExceptionForCaseIndividual(input: UpdateExceptionForCaseIndividualInput!): UpdateCaseResult @authorize(policy: "CaseManagement")
+  "Delete an exception for an individual for a specific case"
+  deleteExceptionForCaseIndividual(input: DeleteExceptionForCaseIndividualInput!): UpdateCaseResult @authorize(policy: "CaseManagement")
+  "Add an exception for an entity for a specific case"
+  addExceptionForCaseEntity(input: AddExceptionForCaseEntityInput!): UpdateCaseResult @authorize(policy: "CaseManagement")
+  "Update an exception for an entity for a specific case"
+  updateExceptionForCaseEntity(input: UpdateExceptionForCaseEntityInput!): UpdateCaseResult @authorize(policy: "CaseManagement")
+  "Delete an exception for an entity for a specific case"
+  deleteExceptionForCaseEntity(input: DeleteExceptionForCaseEntityInput!): UpdateCaseResult @authorize(policy: "CaseManagement")
+  "Submits a draft case and move it's status to in progress"
+  submitCase(caseId: String!): UpdateCaseResult @authorize(policy: "CaseManagement")
+  "Marks a case that is ready for review as complete"
+  completeCase(caseId: String!): UpdateCaseResult @authorize(policy: "CaseManagement")
+  "Reworks a completed case and moves it's status back to in progress"
+  reworkCase(caseId: String!): UpdateCaseResult @authorize(policy: "CaseManagement")
+  "Updates the details of an individual on a case"
+  updateIndividual(input: UpdateIndividualInput!): UpdateCaseResult @authorize(policy: "CaseManagement")
+  "Add a file to an individual document"
+  addIndividualDocumentFile(input: AddIndividualDocumentFileInput!): AddFileResult @authorize(policy: "CaseManagement")
+  "Add a document to an individual"
+  addIndividualDocument(input: AddIndividualDocumentInput!): AddIndividualDocumentResult @authorize(policy: "CaseManagement")
+  "Add a file to an entity document"
+  addEntityDocumentFile(input: AddEntityDocumentFileInput!): AddEntityFileResult @authorize(policy: "CaseManagement")
+  "Add an entity document"
+  addEntityDocument(input: AddEntityDocumentInput!): AddEntityDocumentResult @authorize(policy: "CaseManagement")
+  "Delete an individual document"
+  deleteIndividualDocument(input: DeleteIndividualDocumentInput!): DeleteIndividualDocumentResult @authorize(policy: "CaseManagement")
+  "Delete an individual document file"
+  deleteIndividualDocumentFile(input: DeleteIndividualDocumentFileInput!): DeleteIndividualDocumentFileResult @authorize(policy: "CaseManagement")
+  createWebhookSubscription(input: CreateWebhookInput!): WebhookResult! @authorize(policy: "ApiManagement")
+  deleteWebhookSubscription(input: DeleteWebhookInput!): WebhookResult! @authorize(policy: "ApiManagement")
+  createCasePdf(input: GeneratePdfInput!): GeneratedPdfInformation! @authorize(policy: "CaseManagement")
+}
+
+type Office {
+  key: String!
+  name: String!
+  webhooks: [WebhookSubscription!]!
+  users: [User!]!
+  "The types of verification that can be performed on individuals"
+  individualVerificationTypes: [IndividualVerificationType!]!
+  "The default individual verification that is performed if no other is specified"
+  defaultIndividualVerificationType: IndividualVerificationType!
+}
+
+type OptionsRiskSubmissionAnswer implements ScoredRiskSubmissionAnswer & RiskSubmissionAnswer {
+  question: String!
+  comment: String
+  score: Int
+  notApplicable: Boolean!
+  selectedOptions: [String!]!
+}
+
+"Details of the organization"
+type Organization {
+  "Unique identifier of an organization"
+  organizationId: String!
+  name: String!
+  offices: [Office!]!
+  webhooks: [WebhookSubscription!]!
+  users: [User!]!
+  "The types of verification that can be performed on individuals"
+  individualVerificationTypes: [IndividualVerificationType!]!
+  "The default individual verification that is performed if no other is specified"
+  defaultIndividualVerificationType: IndividualVerificationType!
+}
+
+type PageOfCasesMatchingSearch {
+  "The matching set of cases"
+  cases: [CaseInformation!]
+  "The opaque cursor for fetching the next page of results"
+  nextCursor: String
+  "The page size"
+  pageSize: Int!
+  "True if there is another page to fetch"
+  hasNextPage: Boolean!
+}
+
+type PersonName {
+  firstName: String
+  middleName: String
+  lastName: String
+  fullName: String!
+}
+
+type Query {
+  caseDetails(caseId: String!): QueryCaseResult @authorize(policy: "ReadOnly")
+  searchCases(input: SearchCasesInput!): SearchCasesResults @authorize(policy: "ReadOnly")
+  nextPageOfCases(input: NextPageOfCasesInput!): SearchCasesResults @authorize(policy: "ReadOnly")
+  "Returns data about the currently authenticated API client"
+  me: ApiClientMetadata! @authorize(policy: "ReadOnly")
+}
+
+"Returned when a numeric value does not fall within the allowable range"
+type RangeValidationError implements IValidationError {
+  message: String!
+  fieldPath: [String!]!
+  maximum: Decimal!
+  minimum: Decimal!
+}
+
+"Returned when a required value was not supplied"
+type RequiredValidationError implements IValidationError {
+  message: String!
+  fieldPath: [String!]!
+}
+
+type RiskSubmission {
+  completedOn: DateTime!
+  comment: String
+  totalScore: Int
+  answers: [RiskSubmissionAnswer!]!
+}
+
+"Describes an entity which is the root entity within a case"
+type RootEntityRelationship {
+  "Unique identifier of the entity in the relationship"
+  entityId: String!
+}
+
+"Describes shareholding interest relationship between two entities"
+type ShareholdingEntityRelationship {
+  "Unique identifier of the entity in the relationship"
+  entityId: String!
+  "Unique identifier of the parent entity in the relationship"
+  parentEntityId: String!
+  "Percentage shareholding the entity has of the parent in entity"
+  percentShareholding: Decimal
+  "Whether a shareholding is beneficially held or not"
+  beneficiallyHeld: Boolean
+}
+
+"Describes an individuals shareholding relationship in an entity"
+type ShareholdingIndividualEntityRelationship {
+  "Unique identifier of the entity in the relationship"
+  entityId: String!
+  "Unique identifier of the individual in the relationship"
+  individualId: String!
+  "Shareholding the individual has is in the entity"
+  percentShareholding: Decimal
+}
+
+"Returned when a string value does not fall within the allowable length range"
+type StringLengthValidationError implements IValidationError {
+  message: String!
+  fieldPath: [String!]!
+  maxLength: Int!
+  minLength: Int!
+}
+
+type TextRiskSubmissionAnswer implements RiskSubmissionAnswer {
+  question: String!
+  comment: String
+  notApplicable: Boolean!
+  text: String
+}
+
+"Returned when an identifier passed in can not be resolved (e.g. the data does not exist, or the current client is not authorized to retrieve that data)"
+type UnresolvableValidationError implements IValidationError {
+  message: String!
+  fieldPath: [String!]!
+}
+
+type User {
+  id: String!
+  emailAddress: String!
+  name: String
+  disabled: Boolean!
+  canBeAssignedToCases: Boolean!
+}
+
+type UserProfile {
+  email: String!
+  displayName: String
+  id: Int!
+}
+
+type ValidUrl {
+  "The valid url for the requested action"
+  url: URL!
+}
+
+"A general validation error"
+type ValidationError implements IValidationError {
+  fieldPath: [String!]!
+  message: String!
+}
+
+type ValidationErrors {
+  errors: [IValidationError!]!
+}
+
+type WebhookSubscription {
+  id: String!
+  endpoint: URL!
+  eventTypes: [EventType!]!
+  failureEmail: String!
+}
+
+type YesNoRiskSubmissionAnswer implements ScoredRiskSubmissionAnswer & RiskSubmissionAnswer {
+  question: String!
+  comment: String
+  score: Int
+  notApplicable: Boolean!
+  answer: RiskAssessmentEvaluation!
+}
+
+union AddEntityDocumentResult = ValidationErrors | EntityDocumentInformation
+
+union AddEntityFileResult = ValidationErrors | AddEntityDocumentFileResult
+
+union AddFileResult = ValidationErrors | AddIndividualDocumentFileResult
+
+union AddIndividualDocumentResult = ValidationErrors | IndividualDocumentInformation
+
+union CreateCaseResult = ValidationErrors | CaseInformation
+
+union DeleteIndividualDocumentFileResult = ValidationErrors | IndividualDocumentInformation
+
+union DeleteIndividualDocumentResult = ValidationErrors | CaseIndividual
+
+union EntityRelationship = RootEntityRelationship | ShareholdingEntityRelationship | ControllingEntityRelationship
+
+union IndividualEntityRelationship = ShareholdingIndividualEntityRelationship | ControllingIndividualEntityRelationship
+
+union QueryCaseResult = ValidationErrors | CaseInformation
+
+union SearchCasesResults = ValidationErrors | PageOfCasesMatchingSearch
+
+union UpdateCaseResult = ValidationErrors | CaseInformation
+
+union UrlResultType = ValidUrl | InvalidUrl
+
+union WebhookResult = ValidationErrors | WebhookSubscription
+
+input AddCaseNoteInput {
+  "Unique identifier for a case"
+  caseId: String!
+  "Additional note to add to the case"
+  note: String!
+}
+
+input AddEntityDocumentFileInput {
+  caseId: Int!
+  entityId: Int!
+  documentId: Int!
+  fileExtension: String!
+}
+
+input AddEntityDocumentInput {
+  caseId: Int!
+  entityId: Int!
+  documentTitle: String!
+  documentType: EntityDocumentType!
+  countryCode: String!
+  fields: [DocumentMetaDataFieldInputModelInput!]!
+}
+
+input AddExceptionForCaseEntityInput {
+  "Type of exception"
+  exceptionType: ExceptionType!
+  "Unique identifier for a case"
+  caseId: String!
+  "Unique identifier of the entity"
+  entityId: String!
+  "Reason for exception"
+  reason: String!
+}
+
+input AddExceptionForCaseIndividualInput {
+  "Type of exception"
+  exceptionType: ExceptionType!
+  "Unique identifier for a case"
+  caseId: String!
+  "Unique identifier of an individual"
+  individualId: String!
+  "Reason for exception"
+  reason: String!
+}
+
+input AddIndividualDocumentFileInput {
+  caseId: Int!
+  individualId: Int!
+  documentId: Int!
+  fileTitle: String!
+  fileExtension: String!
+}
+
+input AddIndividualDocumentInput {
+  caseId: Int!
+  individualId: Int!
+  documentTitle: String!
+  documentType: IndividualDocumentType!
+  countryCode: String!
+  fields: [DocumentMetaDataFieldInputModelInput!]!
+}
+
+input AddIndividualsToCaseInput {
+  "Unique identifier for a case"
+  caseId: String!
+  "The additional individuals requiring verification to be added to the case"
+  individuals: [IndividualDetailsInput!]!
+}
+
+input AddressInput {
+  "Line 1 of the Address"
+  address1: String
+  "Line 2 of the Address"
+  address2: String
+  city: String
+  region: String
+  postCode: String
+  "The CCA2 country code"
+  countryCode: String
+}
+
+input ContactDetailsInput {
+  "The full name of the contact"
+  fullName: String!
+  "The email address of the contact"
+  emailAddress: String!
+}
+
+input CreateCaseForEntitiesInput {
+  "The entities requiring verification in this case"
+  entities: [EntityDetailsInput!]!
+  "The individuals requiring verification in this case (including one or more identified case contacts)"
+  individuals: [IndividualDetailsInput!]!
+  "Client-assigned reference for this case. Can be set to null to clear the reference value."
+  reference: String
+  "Notes for the case"
+  notes: String
+  "The state of the case after creation"
+  initialState: InitialCaseState!
+  "The optional level of CDD requested for this case"
+  cddLevel: CddLevel
+  "Unique ID of the Organization to add the case to"
+  organizationId: String!
+  "Unique ID of the Office to add the case to. If this organization has one or more associated offices, then the office is required."
+  officeId: String
+  "Value of the transaction"
+  transactionValue: Decimal
+  "The assessed level of risk for this AML case"
+  riskAssessment: RiskAssessment
+  "The captured activity e.g. Residential sale"
+  capturedActivity: String
+  "The purpose of the activity e.g. Downsizing"
+  purpose: String
+  "More details of the who, what and why e.g. Returning clients selling family home."
+  nature: String
+  "An optional name to assign to the case"
+  name: String
+  "The contact details of the person requesting the case"
+  requestor: ContactDetailsInput
+  "The contact details of the person leading the case"
+  lead: ContactDetailsInput
+  "The users to assign to the case"
+  assignedUsers: [String!]
+  "The type of verification applicable to this case"
+  individualVerificationType: VerificationTypeInput
+}
+
+input CreateCaseForExistingEntityInput {
+  "Unique identifier of the entity"
+  entityId: String
+  "Client-assigned reference for this case. Can be set to null to clear the reference value."
+  reference: String
+  "Notes for the case"
+  notes: String
+  "The state of the case after creation"
+  initialState: InitialCaseState!
+  "The optional level of CDD requested for this case"
+  cddLevel: CddLevel
+  "Unique ID of the Organization to add the case to"
+  organizationId: String!
+  "Unique ID of the Office to add the case to. If this organization has one or more associated offices, then the office is required."
+  officeId: String
+  "Value of the transaction"
+  transactionValue: Decimal
+  "The assessed level of risk for this AML case"
+  riskAssessment: RiskAssessment
+  "The captured activity e.g. Residential sale"
+  capturedActivity: String
+  "The purpose of the activity e.g. Downsizing"
+  purpose: String
+  "More details of the who, what and why e.g. Returning clients selling family home."
+  nature: String
+  "An optional name to assign to the case"
+  name: String
+  "The contact details of the person requesting the case"
+  requestor: ContactDetailsInput
+  "The contact details of the person leading the case"
+  lead: ContactDetailsInput
+  "The users to assign to the case"
+  assignedUsers: [String!]
+  "The type of verification applicable to this case"
+  individualVerificationType: VerificationTypeInput
+}
+
+input CreateCaseForIndividualsInput {
+  "The individuals requiring verification in this case"
+  individuals: [IndividualDetailsInput!]!
+  "Client-assigned reference for this case. Can be set to null to clear the reference value."
+  reference: String
+  "Notes for the case"
+  notes: String
+  "The state of the case after creation"
+  initialState: InitialCaseState!
+  "The optional level of CDD requested for this case"
+  cddLevel: CddLevel
+  "Unique ID of the Organization to add the case to"
+  organizationId: String!
+  "Unique ID of the Office to add the case to. If this organization has one or more associated offices, then the office is required."
+  officeId: String
+  "Value of the transaction"
+  transactionValue: Decimal
+  "The assessed level of risk for this AML case"
+  riskAssessment: RiskAssessment
+  "The captured activity e.g. Residential sale"
+  capturedActivity: String
+  "The purpose of the activity e.g. Downsizing"
+  purpose: String
+  "More details of the who, what and why e.g. Returning clients selling family home."
+  nature: String
+  "An optional name to assign to the case"
+  name: String
+  "The contact details of the person requesting the case"
+  requestor: ContactDetailsInput
+  "The contact details of the person leading the case"
+  lead: ContactDetailsInput
+  "The users to assign to the case"
+  assignedUsers: [String!]
+  "The type of verification applicable to this case"
+  individualVerificationType: VerificationTypeInput
+}
+
+input CreateCaseInput {
+  "The individuals requiring verification in this case"
+  individuals: [IndividualDetailsInput!]!
+  "The root entity requiring verification in this case"
+  rootEntity: EntityDetailsInput
+  "The existing root entity requiring verification in this case"
+  existingRootEntity: ExistingEntityDetailsInput
+  "Client-assigned reference for this case. Can be set to null to clear the reference value."
+  reference: String
+  "Notes for the case"
+  notes: String
+  "The state of the case after creation"
+  initialState: InitialCaseState!
+  "The optional level of CDD requested for this case"
+  cddLevel: CddLevel
+  "Unique ID of the Organization to add the case to"
+  organizationId: String!
+  "Unique ID of the Office to add the case to. If this organization has one or more associated offices, then the office is required."
+  officeId: String
+  "Value of the transaction"
+  transactionValue: Decimal
+  "The assessed level of risk for this AML case"
+  riskAssessment: RiskAssessment
+  "The captured activity e.g. Residential sale"
+  capturedActivity: String
+  "The purpose of the activity e.g. Downsizing"
+  purpose: String
+  "More details of the who, what and why e.g. Returning clients selling family home."
+  nature: String
+  "An optional name to assign to the case"
+  name: String
+  "The contact details of the person requesting the case"
+  requestor: ContactDetailsInput
+  "The contact details of the person leading the case"
+  lead: ContactDetailsInput
+  "The users to assign to the case"
+  assignedUsers: [String!]
+  "The type of verification applicable to this case"
+  individualVerificationType: VerificationTypeInput
+}
+
+input CreateLiteCaseInput {
+  "Client-assigned reference for this case. Can be set to null to clear the reference value."
+  reference: String
+  "The state of the case after creation"
+  initialState: InitialCaseState!
+  "Unique ID of the Organization to add the case to"
+  organizationId: String!
+  "Unique ID of the Office to add the case to. If this organization has one or more associated offices, then the office is required."
+  officeId: String
+  "An optional name to assign to the case"
+  name: String
+  "Details of the individual to be verified"
+  individual: LiteIndividualDetailsInput!
+}
+
+input CreateWebhookInput {
+  endpoint: URL!
+  eventTypes: [EventType!]!
+  failureEmail: String!
+  targets: [WebhookSubscriptionTargetInput!]!
+}
+
+input DeleteExceptionForCaseEntityInput {
+  "Unique identifier for a case"
+  caseId: String!
+  "Unique identifier of the entity"
+  entityId: String!
+}
+
+input DeleteExceptionForCaseIndividualInput {
+  "Unique identifier for a case"
+  caseId: String!
+  "Unique identifier of an individual"
+  individualId: String!
+}
+
+input DeleteIndividualDocumentFileInput {
+  caseId: Int!
+  individualId: Int!
+  documentId: Int!
+  fileId: Int!
+}
+
+input DeleteIndividualDocumentInput {
+  caseId: Int!
+  individualId: Int!
+  documentId: Int!
+}
+
+input DeleteWebhookInput {
+  id: String!
+}
+
+input DocumentMetaDataFieldInputModelInput {
+  name: String!
+  value: String!
+}
+
+input EntityDetailsInput {
+  "The type of entity"
+  type: EntityType!
+  "The trading name of the entity"
+  tradingName: String!
+  "The identifier of the entity"
+  identifier: String
+  "The CCA2 of the country the entity is registered in"
+  registeredCountry: String
+  "The registration authority the entity is registered in"
+  registrationAuthorityCode: RegistrationAuthorityCode
+  "The identifier of the entity"
+  notes: String
+  "The address of the entity"
+  address: AddressInput
+}
+
+input EscalateLiteCaseInput {
+  "The lite case to be escalated"
+  caseId: Int!
+  "The state of the case after escalation"
+  initialState: InitialCaseState!
+}
+
+input ExistingEntityDetailsInput {
+  "Unique identifier of the entity"
+  entityId: String!
+}
+
+input GeneratePdfInput {
+  caseId: Int!
+}
+
+input IndividualDetailsInput {
+  "Does this individual require verification?"
+  needsVerification: Boolean!
+  "Is this individual a contact for this case? If not specified, will be assumed to be false.  For individuals identified as case contacts, an email and\/or phone number must be provided."
+  isCaseContact: Boolean
+  "Email address of the individual"
+  emailAddress: String
+  "Phone number of the individual"
+  phoneNumber: String
+  "Date of birth of the individual"
+  dateOfBirth: Date
+  "The current address of the individual"
+  address: AddressInput
+  "Notes about the individual"
+  notes: String
+  "The CCA2 country code for the individuals citizenship"
+  citizenship: String
+  "The type of verification applicable to this individual"
+  verificationType: VerificationTypeInput
+  "Legal name of the individual"
+  legalName: IndividualNameInput
+  "Preferred name of the individual"
+  preferredName: IndividualNameInput!
+}
+
+"Input for individual name components - all components are optional, but validation will fail unless at least firstName or lastName is populated."
+input IndividualNameInput {
+  firstName: String
+  middleName: String
+  lastName: String
+}
+
+input LiteIndividualDetailsInput {
+  "Email address of the individual"
+  emailAddress: String!
+  "Phone number of the individual"
+  phoneNumber: String!
+  "Legal name of the individual"
+  legalName: IndividualNameInput
+  "Preferred name of the individual"
+  preferredName: IndividualNameInput!
+}
+
+input NextPageOfCasesInput {
+  "The opaque cursor for fetching a page of results (as returned in the 'nextCursor' field from a previous search)"
+  cursor: String!
+}
+
+input SearchCasesInput {
+  "Search term (matches on case unique identifier, case name and case reference"
+  searchTerm: String
+  "The organization to retrieve cases for (unique organization ID). If not specified, cases are retrieved for all accessible organizations."
+  organizationId: String
+  "Filter for cases where a client-assigned reference has been set or not"
+  hasReferenceSet: Boolean
+  "The field to sort search results by"
+  sortField: CaseSearchSortField!
+  "The order in which results are sorted"
+  sortDirection: SortDirection!
+  "If set, will only return cases where lastUpdateOn is greater than the supplied value"
+  updatedAfter: DateTime
+  "The number of items to return per page (maximum of 100 cases)"
+  pageSize: Int! = 100
+}
+
+input UpdateCaseReferenceInput {
+  "Unique identifier for a case"
+  caseId: String!
+  "Client-assigned reference for this case. Can be set to null to clear the reference value."
+  reference: String
+}
+
+input UpdateExceptionForCaseEntityInput {
+  "Whether this temporary exception is resolved or not"
+  isResolved: Boolean
+  "Unique identifier for a case"
+  caseId: String!
+  "Unique identifier of the entity"
+  entityId: String!
+  "Reason for exception"
+  reason: String!
+}
+
+input UpdateExceptionForCaseIndividualInput {
+  "Whether this temporary exception is resolved or not"
+  isResolved: Boolean
+  "Unique identifier for a case"
+  caseId: String!
+  "Unique identifier of an individual"
+  individualId: String!
+  "Reason for exception"
+  reason: String!
+}
+
+input UpdateIndividualDetailsInput {
+  "Legal name of the individual"
+  legalName: IndividualNameInput
+  "Preferred name of the individual"
+  preferredName: IndividualNameInput
+  "Does this individual require verification?"
+  needsVerification: Boolean
+  "Is this individual a contact for this case? If not specified, will be assumed to be false.  For individuals identified as case contacts, an email and\/or phone number must be provided."
+  isCaseContact: Boolean
+  "Email address of the individual"
+  emailAddress: String
+  "Phone number of the individual"
+  phoneNumber: String
+  "Date of birth of the individual"
+  dateOfBirth: Date
+  "The current address of the individual"
+  address: AddressInput
+  "Notes about the individual"
+  notes: String
+  "The CCA2 country code for the individuals citizenship"
+  citizenship: String
+}
+
+input UpdateIndividualInput {
+  caseId: String!
+  individualId: String!
+  individual: UpdateIndividualDetailsInput!
+}
+
+input VerificationTypeInput {
+  verificationTypeId: String
+}
+
+input WebhookSubscriptionTargetInput {
+  organizationKey: String!
+  officeKeys: [String!]
+}
+
+enum ApplyPolicy {
+  BEFORE_RESOLVER
+  AFTER_RESOLVER
+  VALIDATION
+}
+
+enum BiometricVerificationResult {
+  CLEAR
+  CAUTION
+  REJECTED
+  SUSPECTED
+  CONSIDER
+  NOT_CHECKED
+}
+
+enum CaseDocumentType {
+  OTHER
+}
+
+enum CaseSearchSortField {
+  UPDATED_ON
+}
+
+enum CaseStatus {
+  "The case is currently being worked on by compliance staff"
+  IN_PROGRESS
+  "The case is currently on hold"
+  ON_HOLD
+  "The case has been completed"
+  COMPLETED
+  "The case has been abandoned and is not being worked on"
+  ABANDONED
+  "The case is ready for review by compliance staff"
+  READY_FOR_REVIEW
+  "The case is dormant due to inactivity"
+  DORMANT
+  "The case is a draft and has not yet been submitted"
+  DRAFT
+  "The case has been deleted."
+  DELETED
+}
+
+enum CaseType {
+  STANDARD
+  LITE
+}
+
+enum CddLevel {
+  SIMPLIFIED
+  STANDARD
+  ENHANCED
+}
+
+enum ControllingRelationshipType {
+  DIRECTOR
+  NON_DISCRETIONARY_BENEFICIARY
+  TRUSTEE
+  CORPORATE_TRUSTEE
+  ACTING_ON_BEHALF_OF
+  EXECUTOR
+  GENERAL_PARTNER
+  APPOINTOR
+  UNIT_HOLDER
+  BOARD_MEMBER
+  CHAIRPERSON
+  NOMINEE
+  NOMINATOR
+  MANAGER
+  DISCRETIONARY_BENEFICIARY
+  DISCRETIONARY_TRUSTEE
+  OTHER
+  LIMITED_PARTNER
+  SETTLOR
+  PROTECTOR
+  BENEFICIARY
+  ACCOUNTANT
+  GUARDIAN
+  INTERMEDIARY_AGENT
+  LAWYER
+  INTERMEDIARY
+  BANK_ACCOUNT_HOLDER
+  LEGAL_EXECUTIVE
+  OFFICER
+  ADVISORY_TRUSTEE
+  INVESTMENT_MANAGER
+  MEMBER
+  MANAGING_DIRECTOR
+  SIGNATORY
+  TREASURER
+  SECRETARY
+  PRESIDENT
+}
+
+enum DocumentFieldType {
+  TEXT
+  NUMBER
+  DATE
+  SELECT
+}
+
+enum DocumentVerificationResult {
+  CLEAR
+  CAUTION
+  REJECTED
+  SUSPECTED
+  CONSIDER
+  NOT_CHECKED
+}
+
+enum EntityDocumentType {
+  OTHER
+  EXCEPTION_SUPPORTING_APPROVAL
+  COMPANY_EXTRACT
+  ANNUAL_REPORT
+  ANNUAL_RETURN
+  ASIC_REPORT
+  BANK_STATEMENT
+  BODY_CORP_MEMBERS
+  BODY_CORP_RULES
+  CAPITAL_SCHEDULE
+  GOOD_STANDING_CERT
+  CERTIFIED_AMENDMENT_DEED
+  CERTIFIED_COMPANY_EXTRACT
+  CERTIFIED_FINANCIAL_STATEMENTS
+  CERTIFIED_INCUMBENCY_CERT
+  CERTIFIED_REGISTER_UNIT_HOLDERS
+  CERTIFIED_TRUST_DEED
+  CERTIFIED_TRUST_AMENDMENT_DEED
+  CERTIFIED_VARIATION_DEED
+  CHARITY_RULES
+  CHARITY_RULES_AMENDMENT
+  CHARITY_SUMMARY
+  COMPANY_CONSTITUTION
+  COMPANY_EXTRACT_EQUIVALENT
+  CONSENT_TO_REUSE
+  BARE_TRUST_DECLARATION
+  AMENDMENT_DEED
+  TRUST_AMENDMENT_DEED
+  INDEMNITY_DEED
+  NOMINATION_DEED
+  PARTICIPATION_DEED
+  TRUST_DEED
+  TRUST_DEED_VARIATION
+  FINANCIAL_STATEMENTS
+  INCORPORATION_CERT
+  INCUMBENCY_CERT
+  INFORMAL_PARTNERSHIP_CONFIRMATION
+  JOINT_VENTURE_DEED
+  LEASE
+  LIMITED_PARTNERSHIP_AGREEMENT
+  LIMITED_PARTNERSHIP_AGREEMENT_EQUIVALENT
+  LOAN_AGREEMENT
+  NO_MATERIAL_CHANGE_CONFIRMED
+  NOMINATED_INDIVIDUALS
+  PARTNERSHIP_AGREEMENT
+  PROBATE
+  PROOF_OF_ADDRESS
+  SHAREHOLDER_REGISTER
+  UNIT_HOLDERS_REGISTER
+  OWNER_REGISTER
+  SHAREHOLDING_CHART
+  SHAREHOLDING_CONFIRMATION
+  NOMINEE_SHAREHOLDING_STRUCTURE
+  SOURCE_OF_WEALTH_FUNDS @deprecated(reason: "Use SourceOfWealth or SourceOfFunds instead")
+  TRUST_ORDER
+  VESTING_ORDER
+  WHOLESALE_INVESTOR_CERT
+  WILL
+  TRUST_DEED_EQUIVALENT
+  JOINT_VENTURE_DEED_EQUIVALENT
+  TRANSPARENCY_REGISTER_EXCERPT
+  DISCLOSURE_LETTER_CONFIRMING_NO_ULTIMATE_BENEFICIAL_OWNERS_MORE_THAN25_PERCENT
+  DEED_OF_RETIREMENT_OF_TRUSTEE
+  CUSTOM
+  SETTLEMENT_DEED
+  SOURCE_OF_WEALTH
+  SOURCE_OF_FUNDS
+}
+
+enum EntityType {
+  PRIVATE_COMPANY
+  PUBLIC_COMPANY
+  TRUST
+  PARTNERSHIP
+  LIMITED_PARTNERSHIP
+  OTHER
+  TRUST_PARTNERSHIP
+  GOVERNMENT_BODY
+  CHARITY
+  JOINT_VENTURES
+  INCORPORATED_SOCIETY
+  FUND
+  LIMITED_PARTNER
+  GENERAL_PARTNER
+  UNIT_TRUST
+  SUPERANNUATION_FUND
+  ESTATE
+  NOMINEE
+  NOMINATOR
+  DISCRETIONARY_TRUST
+  SYNDICATE
+  ASSOCIATE
+  COOPERATIVE
+  TESTAMENTARY_TRUST
+  SOLE_TRADER
+  BARE_TRUST
+  INTEREST_IN_POSSESSION_TRUST
+  ACCUMULATION_TRUST
+  MIXED_TRUST
+  SETTLOR_INTERESTED_TRUST
+  NON_RESIDENT_TRUST
+  LIMITED_LIABILITY_PARTNERSHIP
+  BODY_CORPORATE
+  UNKNOWN
+  PRE_INCORPORATION
+  LIMITED_LIABILITY_COMPANY
+  PENSION_FUND
+  UNLISTED_PUBLIC_COMPANY
+}
+
+enum EventType {
+  TEST
+  CASE_STATUS_UPDATED
+  CASE_CREATED
+  PDF_UPDATED
+}
+
+enum ExceptionType {
+  PERMANENT
+  TEMPORARY
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  INDETERMINATE
+}
+
+enum GeneratedPdfStatus {
+  PROCESSING
+  COMPLETED
+  SUPERSEDED
+  FAILED
+}
+
+enum IndividualDocumentFileType {
+  OTHER
+  DOCUMENT
+  FRONT_SIDE_IMAGE
+  BACK_SIDE_IMAGE
+}
+
+enum IndividualDocumentType {
+  PASSPORT
+  DRIVERS_LICENCE
+  SELFIE_IMAGE
+  EIV_RESULT
+  PEP_CHECK
+  CERTIFIED_PASSPORT
+  CERTIFIED_ADDRESS
+  OTHER
+  PEP_MATCH_REPORT
+  CERTIFIED_DRIVERS_LICENCE
+  NATIONAL_ID_CARD
+  CONSENT_TO_REUSE
+  CONSENT_TO_EIV
+  MANUAL_FORM
+  PROOF_OF_ADDRESS
+  BIOMETRIC_VIDEO
+  EXCEPTION_SUPPORTING_APPROVAL
+  SOURCE_OF_WEALTH
+  PROBATE
+  WILL
+  SHAREHOLDING_STRUCTURE_CHART
+  DEED_OF_NOMINATION
+  CERTIFIED_ID
+  BIRTH_CERTIFICATE
+  NAME_CHANGE_CERTIFICATES
+  AUTHORITY_TO_ACT
+  CERTIFICATE_OF_MENTAL_INCAPACITY
+  CERTIFICATE_OF_NON_REVOCATION
+  DEATH_CERTIFICATE
+  DECLARATION_OF_IDENTITY
+  EVIDENCE_OF_ROLE
+  MARRIAGE_CERTIFICATE
+  NON_SUSPENSION_OF_THE_ENDURING_POWER_OF_ATTORNEY
+  COMPLIANCE_TEAM_NOTES
+  ENDURING_POWER_OF_ATTORNEY
+  SOURCE_OF_FUNDS
+  CUSTOM
+}
+
+enum InitialCaseState {
+  DRAFT
+  SUBMIT_TO_FIRST_AML
+}
+
+enum PdfType {
+  CASE_SUMMARY
+}
+
+enum RegistrationAuthorityCode {
+  DE_AACHEN
+  DE_ALTENBURG
+  DE_AMBERG
+  DE_ANSBACH
+  DE_APOLDA
+  DE_ARNSBERG
+  DE_ARNSTADT
+  DE_ASCHAFFENBURG
+  DE_AUGSBURG
+  DE_AURICH
+  DE_BAD_HERSFELD
+  DE_BAD_HOMBURG_VD_HOHE
+  DE_BAD_KREUZNACH
+  DE_BAD_OEYNHAUSEN
+  DE_BAD_SALZUNGEN
+  DE_BAMBERG
+  DE_BAYREUTH
+  DE_BERLIN_CHARLOTTENBURG
+  DE_BIELEFELD
+  DE_BOCHUM
+  DE_BONN
+  DE_BRAUNSCHWEIG
+  DE_BREMEN
+  DE_CHEMNITZ
+  DE_COBURG
+  DE_COESFELD
+  DE_COTTBUS
+  DE_DUREN
+  DE_DUSSELDORF
+  DE_DARMSTADT
+  DE_DEGGENDORF
+  DE_DORTMUND
+  DE_DRESDEN
+  DE_DUISBURG
+  DE_EISENACH
+  DE_ERFURT
+  DE_ESCHWEGE
+  DE_ESSEN
+  DE_FURTH
+  DE_FLENSBURG
+  DE_FRANKFURT_ODER
+  DE_FRANKFURT_AM_MAIN
+  DE_FREIBURG
+  DE_FRIEDBERG_HESSEN
+  DE_FRITZLAR
+  DE_FULDA
+  DE_GOTTINGEN
+  DE_GUTERSLOH
+  DE_GELSENKIRCHEN
+  DE_GERA
+  DE_GIESSEN
+  DE_GOTHA
+  DE_GREIZ
+  DE_HAGEN
+  DE_HAMBURG
+  DE_HAMM
+  DE_HANAU
+  DE_HANNOVER
+  DE_HEILBAD_HEILIGENSTADT
+  DE_HILDBURGHAUSEN
+  DE_HILDESHEIM
+  DE_HOF
+  DE_HOMBURG
+  DE_INGOLSTADT
+  DE_ISERLOHN
+  DE_JENA
+  DE_KOLN
+  DE_KONIGSTEIN_IM_TAUNUS
+  DE_KAISERSLAUTERN
+  DE_KASSEL
+  DE_KEMPTEN
+  DE_KIEL
+  DE_KLEVE
+  DE_KOBLENZ
+  DE_KORBACH
+  DE_KREFELD
+  DE_LUBECK
+  DE_LUNEBURG
+  DE_LANDAU_IN_DER_PFALZ
+  DE_LANDSHUT
+  DE_LEBACH
+  DE_LEIPZIG
+  DE_LEMGO
+  DE_LIMBURG_AD_LAHN
+  DE_LUDWIGSHAFEN_AM_RHEIN
+  DE_MONCHENGLADBACH
+  DE_MUHLHAUSEN
+  DE_MUNCHEN
+  DE_MUNSTER
+  DE_MAINZ
+  DE_MANNHEIM
+  DE_MARBURG
+  DE_MEININGEN
+  DE_MEMMINGEN
+  DE_MERZIG
+  DE_MONTABAUR
+  DE_NURNBERG
+  DE_NEUBRANDENBURG
+  DE_NEUNKIRCHEN
+  DE_NEURUPPIN
+  DE_NEUSS
+  DE_NORDHAUSEN
+  DE_OFFENBACH_AM_MAIN
+  DE_OLDENBURG
+  DE_OSNABRUCK
+  DE_OTTWEILER
+  DE_POSSNECK
+  DE_PADERBORN
+  DE_PASSAU
+  DE_PINNEBERG
+  DE_POTSDAM
+  DE_RECKLINGHAUSEN
+  DE_REGENSBURG
+  DE_ROSTOCK
+  DE_RUDOLSTADT
+  DE_SOMMERDA
+  DE_SAARBRUCKEN
+  DE_SAARLOUIS
+  DE_SANKT_INGBERT
+  DE_SANKT_WENDEL
+  DE_SCHWEINFURT
+  DE_SCHWERIN
+  DE_SIEGBURG
+  DE_SIEGEN
+  DE_SONDERSHAUSEN
+  DE_SONNEBERG
+  DE_STADTHAGEN
+  DE_STADTRODA
+  DE_STEINFURT
+  DE_STENDAL
+  DE_STRALSUND
+  DE_STRAUBING
+  DE_STUTTGART
+  DE_SUHL
+  DE_TOSTEDT
+  DE_TRAUNSTEIN
+  DE_ULM
+  DE_VOLKLINGEN
+  DE_WURZBURG
+  DE_WALSRODE
+  DE_WEIDEN_ID_OPF
+  DE_WEIMAR
+  DE_WETZLAR
+  DE_WIESBADEN
+  DE_WITTLICH
+  DE_WUPPERTAL
+  DE_ZWEIBRUCKEN
+  US_ALABAMA
+  US_ALASKA
+  US_ARIZONA
+  US_ARKANSAS
+  US_CALIFORNIA
+  US_COLORADO
+  US_CONNECTICUT
+  US_DELAWARE
+  US_FLORIDA
+  US_GEORGIA
+  US_HAWAII
+  US_IDAHO
+  US_ILLINOIS
+  US_INDIANA
+  US_IOWA
+  US_KANSAS
+  US_KENTUCKY
+  US_LOUISIANA
+  US_MAINE
+  US_MARYLAND
+  US_MASSACHUSETTS
+  US_MICHIGAN
+  US_MINNESOTA
+  US_MISSISSIPPI
+  US_MISSOURI
+  US_MONTANA
+  US_NEBRASKA
+  US_NEVADA
+  US_NEW_HAMPSHIRE
+  US_NEW_JERSEY
+  US_NEW_MEXICO
+  US_NEW_YORK
+  US_NORTH_CAROLINA
+  US_NORTH_DAKOTA
+  US_OHIO
+  US_OKLAHOMA
+  US_OREGON
+  US_PENNSYLVANIA
+  US_RHODE_ISLAND
+  US_SOUTH_CAROLINA
+  US_SOUTH_DAKOTA
+  US_TENNESSEE
+  US_TEXAS
+  US_UTAH
+  US_VERMONT
+  US_VIRGINIA
+  US_WASHINGTON
+  US_WEST_VIRGINIA
+  US_WISCONSIN
+  US_WYOMING
+  US_DISTRICT_OF_COLUMBIA
+  US_AMERICAN_SAMOA
+  CA_ALBERTA
+  CA_BRITISH_COLUMBIA
+  CA_MANITOBA
+  CA_NEW_BRUNSWICK
+  CA_NEWFOUNDLANDAND_LABRADOR
+  CA_NOVA_SCOTIA
+  CA_ONTARIO
+  CA_PRINCE_EDWARD_ISLAND
+  CA_QUEBEC
+  CA_SASKATCHEWAN
+  CA_NORTHWEST_TERRITORIES
+  CA_NUNAVUT
+  CA_YUKON
+  CA_FEDERAL
+}
+
+enum RiskAssessment {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum RiskAssessmentEvaluation {
+  NO
+  YES
+  NOT_APPLICABLE
+}
+
+enum ScreeningResult {
+  NOT_SEARCHED
+  NO_MATCH
+  MATCH
+}
+
+enum ScreeningStatus {
+  NOT_NEEDED
+  IN_PROGRESS
+  NO_MATCH
+  MATCH
+  POSSIBLE_MATCH
+}
+
+enum SortDirection {
+  ASCENDING
+  DESCENDING
+}
+
+enum VerificationResult {
+  NOT_SEARCHED
+  FAIL
+  PASS
+}
+
+enum VerificationStatus {
+  NOT_NEEDED
+  IN_PROGRESS
+  PASS
+  FAIL
+  CONSIDER
+}
+
+directive @authorize("The name of the authorization policy that determines access to the annotated resource." policy: String "Roles that are allowed to access the annotated resource." roles: [String!] "Defines when when the authorize directive shall be applied.By default the authorize directives are applied during the validation phase." apply: ApplyPolicy! = BEFORE_RESOLVER) repeatable on OBJECT | FIELD_DEFINITION
+
+"The `Date` scalar represents an ISO-8601 compliant date type."
+scalar Date
+
+"The `DateTime` scalar represents an ISO-8601 compliant date time type."
+scalar DateTime @specifiedBy(url: "https:\/\/www.graphql-scalars.com\/date-time")
+
+"The built-in `Decimal` scalar type."
+scalar Decimal
+
+scalar URL @specifiedBy(url: "https:\/\/tools.ietf.org\/html\/rfc3986")

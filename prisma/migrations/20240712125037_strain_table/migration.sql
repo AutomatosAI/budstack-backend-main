@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Strain" ALTER COLUMN "stockQuantity" SET DATA TYPE DOUBLE PRECISION;
+
+-- AlterTable
+ALTER TABLE "StrainLocation" ALTER COLUMN "stockQuantity" SET DATA TYPE DOUBLE PRECISION;

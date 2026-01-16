@@ -1,0 +1,771 @@
+// This is your Prisma schema file
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PROD_DATABASE_URL")
+}
+
+model User {
+  id                     String                   @id @default(uuid())
+  walletAddress          String?                  @unique
+  signerWalletAddress    String?
+  nonce                  Int?
+  email                  String?                  @unique
+  isVerified             Boolean                  @default(false) //used only for admin, managers and subAdmins
+  fullName               String?
+  username               String?                  @unique
+  phoneCountryCode       String?
+  phoneCode              String?
+  phoneNumber            String?
+  profileUrl             String?
+  bio                    String?
+  role                   Role                     @default(USER)
+  notification           Boolean                  @default(true)
+  enable2fa              Boolean                  @default(false)
+  primaryNftId           String?
+  PrimaryNft             Nft?                     @relation("primaryNft", fields: [primaryNftId], references: [id])
+  signature              String? // Note: this is for only managers and subAdmins
+  isActive               Boolean                  @default(true)
+  commissionPercent      Float?
+  updatedAt              DateTime                 @updatedAt
+  createdAt              DateTime                 @default(now())
+  nft                    Nft[]                    @relation("owner")
+  buyer                  NftSale[]                @relation("buyer")
+  seller                 NftSale[]                @relation("seller")
+  userPermission         UserPermissions[]
+  UserNftRoleAssociation UserNftRoleAssociation[]
+  commission             Commissions[]
+  clientLogs             ClientLogs[]
+  orderLogs              OrderLogs[]
+  notificatios           Notification[]
+  fcmTokens              FCMToken[]
+  apiKeys                ApiKey[]
+}
+
+model PlanetDetail {
+  planetNo             Int                       @id @default(autoincrement())
+  name                 String?
+  imageUrl             String?
+  videoUrl             String?
+  iosVideoUrl          String?
+  thumbnailImageUrl    String?
+  thumbnailVideoUrl    String?
+  thumbnailIosVideoUrl String?
+  description          String?
+  strains              PlanetStrain[]
+  chronicles           Json?
+  planetDetailJson     Json?
+  updatedAt            DateTime                  @updatedAt
+  createdAt            DateTime                  @default(now())
+  deletedAt            DateTime?
+  nftMetadatas         PlanetDetailNftMetadata[]
+}
+
+model Event {
+  id            String     @id @default(uuid())
+  title         String
+  description   String?
+  eventImageUrl String[]
+  eventDate     DateTime?
+  location      String?
+  eventType     EventType? @default(Virtual)
+  ctaText       String?
+  ctaUrl        String?
+  organizedBy   String?
+  startTime     DateTime?
+  endTime       DateTime?
+  isActive      Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  notificatios Notification[]
+}
+
+model Strain {
+  id             String               @id @default(uuid())
+  name           String
+  description    String
+  type           StrainType // Strain Type: Hybrid, Sativa, Indica
+  thc            Float?
+  cbg            Float?
+  cbd            Float?
+  batchNumber    String?
+  strainId       String?
+  feelings       String?
+  helpsWith      String?
+  flavour        String?
+  effects        String?
+  popularity     Int?
+  imageUrl       String?
+  wholeSalePrice Float? // wholeSalePrice of the strain
+  retailPrice    Float? // retailPrice of the strain
+  prices         MultiCurrencyPrice[]
+  stockQuantity  Float // Available stock quantity
+  isAvailable    Boolean              @default(false)
+  expiryDate     DateTime? // Expiry date of the strain
+  discount       Float? // discount in percent
+  isActive       Boolean              @default(false)
+  isDeleted      Boolean              @default(false)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  deletedAt      DateTime? // Nullable field for soft delete
+
+  orderLine       OrderLine[] // Relation with OrderLine
+  strainImages    StrainImage[] // Relation with StrainImage
+  strainLocations StrainLocation[] // Relation with StrainLocation
+  planets         PlanetStrain[] // Relation with PlanetStrain
+  clientCart      CartItems[]
+}
+
+model MultiCurrencyPrice {
+  id             String   @id @default(uuid())
+  strainId       String
+  strain         Strain   @relation(fields: [strainId], references: [id])
+  wholeSalePrice Float? // wholeSalePrice of the strain
+  retailPrice    Float? // retailPrice of the strain
+  currency       String // Currency code (e.g., USD, EUR, GBP)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([strainId, currency], name: "Unique_ProductCurrency")
+}
+
+model PlanetStrain {
+  planetDetail   PlanetDetail @relation(fields: [planetDetailId], references: [planetNo])
+  planetDetailId Int
+  strain         Strain       @relation(fields: [strainId], references: [id])
+  strainId       String
+
+  @@id([planetDetailId, strainId])
+}
+
+// strain locations for availablity
+model Location {
+  id              String           @id @default(uuid())
+  country         String
+  countryCode     String           @unique
+  strainLocations StrainLocation[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model StrainLocation {
+  id            Int      @id @default(autoincrement())
+  strainId      String
+  locationId    String
+  stockQuantity Float
+  isAvailable   Boolean  @default(false)
+  isActive      Boolean  @default(false)
+  strain        Strain   @relation(fields: [strainId], references: [id])
+  location      Location @relation(fields: [locationId], references: [id])
+
+  @@unique([strainId, locationId])
+}
+
+model StrainImage {
+  id             String   @id @default(uuid())
+  strainImageUrl String?
+  altText        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  strain         Strain   @relation(fields: [strainId], references: [id])
+  strainId       String
+}
+
+model Client {
+  id               String                @id @default(uuid())
+  firstName        String
+  lastName         String?
+  email            String?               @unique
+  phoneCountryCode String?
+  phoneCode        String?
+  contactNumber    String?               @unique
+  caseId           String?               @unique
+  maxRetries       Int                   @default(0)
+  adminApproval    AdminApprovalOnClient @default(PENDING)
+  isKYCVerified    Boolean               @default(false)
+  isActive         Boolean               @default(false)
+  rejectionNote    String?
+  verifiedAt       DateTime?
+  rejectedAt       DateTime?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  deletedAt        DateTime? // Nullable field for soft delete
+  shippings        Shipping[]
+  nft              Nft                   @relation(fields: [nftId], references: [id])
+  nftId            String
+  orders           Order[]
+  documents        ClientDocument[]
+  clientBusinesses ClientBusiness[]
+  sales            Sale[]
+  transactions     Transaction[]
+  clientCart       ClientCart[]
+  clientLogs       ClientLogs[]
+  notificatios     Notification[]
+  medicalRecord    ClientMedicalRecords?
+}
+
+model ClientMedicalRecords {
+  id                       String   @id @default(uuid())
+  dob                      String
+  gender                   String
+  medicalConditions        String[]
+  otherMedicalCondition    String?
+  medicinesTreatments      String[]
+  otherMedicalTreatments   String?
+  medicalHistory0          Boolean  @default(false)
+  medicalHistory1          Boolean  @default(false)
+  medicalHistory2          Boolean  @default(false)
+  medicalHistory3          Boolean  @default(false)
+  medicalHistory4          Boolean  @default(false)
+  medicalHistory5          String[]
+  medicalHistory6          Boolean?
+  medicalHistory7          String[]
+  medicalHistory7Relation  String?
+  medicalHistory8          Boolean  @default(false)
+  medicalHistory9          Boolean  @default(false)
+  medicalHistory10         Boolean  @default(false)
+  medicalHistory11         String?
+  medicalHistory12         Boolean  @default(false)
+  medicalHistory13         String
+  medicalHistory14         String[]
+  medicalHistory15         String?
+  medicalHistory16         Boolean?
+  prescriptionsSupplements String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  client                   Client   @relation(fields: [clientId], references: [id])
+  clientId                 String   @unique
+}
+
+// client can have multiple businesses in future ,for now its just one client with one business
+model ClientBusiness {
+  id           String   @id @default(uuid())
+  name         String?
+  address1     String
+  address2     String
+  landmark     String?
+  city         String
+  state        String
+  country      String
+  postalCode   String?
+  countryCode  String?
+  businessType String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  client       Client   @relation(fields: [clientId], references: [id])
+  clientId     String
+}
+
+model ClientDocument {
+  id           String       @id @default(uuid())
+  documentUrl  String
+  documentType DocumentType @default(ID)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  client       Client       @relation(fields: [clientId], references: [id])
+  clientId     String
+}
+
+// client can have multiple shipping addresses in future ,for now its just one client with one address
+model Shipping {
+  id          String   @id @default(uuid())
+  default     Boolean  @default(false)
+  address1    String
+  address2    String
+  landmark    String?
+  city        String
+  state       String
+  country     String
+  postalCode  String?
+  countryCode String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  client      Client   @relation(fields: [clientId], references: [id])
+  clientId    String
+  order       Order[]
+}
+
+model Contracts {
+  id                 String         @id @default(uuid())
+  contractName       String
+  address            String         @unique
+  royaltyFee         Float          @default(9)
+  blockchainType     BlockchainType
+  chainName          String
+  tokenStandard      String
+  chainId            Int
+  isMintPause        Boolean
+  maxSupply          Int
+  planetMintingLimit Int            @default(251)
+  activeRoundId      Int            @default(0)
+  isEnabled          Boolean        @default(false)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+}
+
+model Nft {
+  id               String            @id @default(uuid())
+  tokenId          Int               @unique
+  metadataId       Int?              @unique
+  roundId          Int?
+  mintedAt         DateTime?
+  lastTransferTime DateTime?
+  isListedForSale  Boolean           @default(false)
+  price            Float?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  orders           Order[]
+  sales            Sale[]
+  clients          Client[]
+  nftSalesHistory  NftSale[]
+  nftTransactions  NftTransactions[]
+  owner            User?             @relation("owner", fields: [ownerId], references: [walletAddress])
+  ownerId          String?
+  user             User[]            @relation("primaryNft")
+
+  associatedUsers UserNftRoleAssociation[]
+  nftMetadata     NftMetadata?             @relation(fields: [metadataId], references: [metadataId])
+}
+
+model UserNftRoleAssociation {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenId   Int
+  user      User     @relation(fields: [userId], references: [id])
+  nft       Nft      @relation(fields: [tokenId], references: [tokenId])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, tokenId], name: "Unique_UserNftRole")
+}
+
+model UserPermissions {
+  id            String         @id @default(uuid())
+  userId        String
+  read          Boolean        @default(false)
+  write         Boolean        @default(false)
+  permission    PermissionType
+  isWhitelister Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Commissions {
+  id             String        @id @default(uuid())
+  userId         String
+  orderId        String
+  amountInEth    Float? // amount should be in ETH
+  amountInDollar Float? // amount should be in dollar
+  paymentStatus  PaymentStatus
+  order          Order         @relation(fields: [orderId], references: [id])
+  user           User          @relation(fields: [userId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+// metadata should be created first for all tokens and just update txCount and clientCount while clientAdd/nftTransfer operations
+//TODO: tokenId should be have relation with nftTable to avoid inconsitency
+model NftMetadata {
+  metadataId    Int                       @id @default(autoincrement())
+  tokenId       Int?                      @unique
+  nftType       NftType?
+  nftName       String?
+  imageUrl      String?
+  description   String?
+  txCount       Int?
+  txVolume      Int?
+  clientCount   Int?
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  planetDetails PlanetDetailNftMetadata[]
+  nft           Nft?
+}
+
+model PlanetDetailNftMetadata {
+  planetDetailId Int
+  metadataId     Int
+  planetDetail   PlanetDetail @relation(fields: [planetDetailId], references: [planetNo])
+  nftMetadata    NftMetadata  @relation(fields: [metadataId], references: [metadataId])
+
+  @@id([planetDetailId, metadataId])
+}
+
+model NftTransactions {
+  id        String             @id @default(uuid())
+  tokenId   Int
+  from      String
+  to        String?
+  type      NftTransactionType
+  price     Float?
+  txHash    String?
+  timestamp DateTime?
+  createdAt DateTime           @default(now())
+  nft       Nft                @relation(fields: [tokenId], references: [tokenId])
+}
+
+model CronJobEvents {
+  id        String   @id @default(uuid())
+  jobName   String   @unique
+  isRunning Boolean  @default(false)
+  syncBlock Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EventHistory {
+  id               String   @id @default(uuid())
+  blockNumber      Int
+  logIndex         Int
+  tokenId          Int
+  contractAddress  String
+  transactionHash  String
+  transactionIndex Int
+  status           TxStatus @default(PENDING)
+  createdAt        DateTime @default(now())
+  eventType        String
+  errorMessage     String?
+}
+
+model Sale {
+  id          String    @id @default(uuid())
+  stage       SaleStage @default(LEADS)
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  nft         Nft       @relation(fields: [nftId], references: [id])
+  nftId       String
+  client      Client    @relation(fields: [clientId], references: [id])
+  clientId    String
+  order       Order?    @relation(fields: [orderId], references: [id])
+  orderId     String?   @unique
+}
+
+model Order {
+  id                        String               @id @default(uuid())
+  orderStatus               OrderStatus          @default(PENDING)
+  paymentStatus             PaymentStatus        @default(PENDING)
+  adminApproval             AdminApprovalOnOrder @default(PENDING)
+  agentProfit               Float?
+  totalAmount               Float?
+  invoiceNumber             String?              @unique
+  rejectionNote             String?
+  commissionPaid            Boolean              @default(false)
+  commissionTransactionHash String?
+  verifiedAt                DateTime?
+  rejectedAt                DateTime?
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+  nft                       Nft                  @relation(fields: [nftId], references: [id])
+  nftId                     String
+  client                    Client               @relation(fields: [clientId], references: [id])
+  clientId                  String
+  shippingId                String?
+  shipping                  Shipping?            @relation(fields: [shippingId], references: [id])
+  orderLines                OrderLine[]
+  commission                Commissions[]
+  sale                      Sale?
+  orderLogs                 OrderLogs[]
+  //add shipping address id
+  Notification              Notification[]
+  transactions              Transaction[]
+  nonce                     String?              @unique
+}
+
+model OrderLine {
+  id        String   @id @default(uuid())
+  quantity  Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String
+  strain    Strain?  @relation(fields: [strainId], references: [id])
+  strainId  String?
+
+  @@unique([strainId, orderId])
+}
+
+model ClientCart {
+  id        String      @id @default(uuid())
+  clientId  String      @unique
+  client    Client      @relation(fields: [clientId], references: [id])
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  cartItems CartItems[]
+}
+
+model CartItems {
+  id           String     @id @default(uuid())
+  quantity     Float
+  strainId     String
+  strain       Strain     @relation(fields: [strainId], references: [id])
+  clientCartId String
+  clientCart   ClientCart @relation(fields: [clientCartId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([strainId, clientCartId])
+}
+
+model Transaction {
+  id           String            @id @default(uuid())
+  amount       Float //amount in usd
+  method       TransactionType
+  currencyType String?
+  description  String
+  destination  String
+  order        Order             @relation(fields: [orderId], references: [id])
+  invoice      String?
+  clientId     String
+  client       Client            @relation(fields: [clientId], references: [id])
+  status       TransactionStatus @default(PENDING)
+  orderId      String
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
+model NftSale {
+  id        String   @id @default(uuid())
+  tokenId   Int
+  sellerId  String
+  salePrice Float
+  isListed  Boolean  @default(true)
+  signature String
+  timestamp String?
+  buyerId   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  nft    Nft   @relation(fields: [tokenId], references: [tokenId])
+  seller User  @relation("seller", fields: [sellerId], references: [id])
+  buyer  User? @relation("buyer", fields: [buyerId], references: [id])
+}
+
+model WhitelistedUsers {
+  walletAddress     String   @unique
+  goldSignature     String?
+  platinumSignature String?
+  standardSignature String?
+  goldLimit         Int      @default(0)
+  goldMinted        Int      @default(0)
+  platinumLimit     Int      @default(0)
+  platinumMinted    Int      @default(0)
+  standardLimit     Int      @default(0)
+  standardMinted    Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model OrderLogs {
+  id        String        @unique @default(uuid())
+  userId    String
+  orderId   String
+  activity  OrderActivity
+  order     Order         @relation(fields: [orderId], references: [id])
+  user      User          @relation(fields: [userId], references: [id])
+  createdAt DateTime      @default(now())
+}
+
+model ClientLogs {
+  id        String         @unique @default(uuid())
+  userId    String
+  clientId  String
+  activity  ClientActivity
+  Client    Client         @relation(fields: [clientId], references: [id])
+  user      User           @relation(fields: [userId], references: [id])
+  createdAt DateTime       @default(now())
+}
+
+model Notification {
+  id        String             @id @default(uuid())
+  title     String
+  message   String
+  userId    String
+  clientId  String?
+  orderId   String?
+  eventId   String?
+  status    NotificationStatus @default(unRead)
+  user      User?              @relation(fields: [userId], references: [id])
+  client    Client?            @relation(fields: [clientId], references: [id])
+  order     Order?             @relation(fields: [orderId], references: [id])
+  event     Event?             @relation(fields: [eventId], references: [id])
+  createdAt DateTime           @default(now())
+}
+
+model ApiKey {
+  id        String   @id @default(uuid())
+  userId    String
+  keyName   String
+  key       String   @unique
+  isDelete  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("ApiKey")
+}
+
+model FCMToken {
+  token     String   @unique
+  userId    String
+  user      User?    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@id([userId, token])
+}
+
+model WalletProof {
+  id            String   @id @default(uuid())
+  walletAddress String
+  proof         String
+  createdAt     DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------------------------- ENUMS ----------------------------------------------------------------------------------------------
+
+enum TxStatus {
+  PENDING
+  SUCCESS
+  ERROR
+  FAILED
+}
+
+enum StrainType {
+  Hybrid
+  Sativa
+  Indica
+}
+
+enum OrderActivity {
+  OrderCreated
+  Approved
+  Rejected
+  PaymentFailed
+  PaymentSuccess
+  Processing
+  Shipped
+  Delivered
+}
+
+enum ClientActivity {
+  Approved
+  Rejected
+  Active
+  InActive
+  Deleted
+  Restored
+}
+
+// enum SalesAndPipelineActivity {
+//   Created
+// }
+
+enum Role {
+  SUPERADMIN
+  ADMIN
+  SUBADMIN
+  MANAGER
+  USER
+}
+
+enum PermissionType {
+  AdminDashboard
+  ClientVerification
+  UserManagement
+  EventManagement
+  SubAdminManagement
+  CelebrityAgent
+  SalesAndOrderTracking
+  InventoryManagement
+  ReportAndAnalytics
+  DApp
+}
+
+enum UnitOfMeasurement {
+  KG
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+}
+
+enum AdminApprovalOnOrder {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum AdminApprovalOnClient {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum TransactionType {
+  DEBIT
+  CREDIT
+  CRYPTO
+  FIAT
+}
+
+enum TransactionStatus {
+  PENDING
+  FAILED
+  COMPLETED
+  CANCELED
+  EXPIRED
+  UNDERPAID
+  OVERPAID
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+}
+
+enum SaleStage {
+  LEADS
+  ONGOING
+  CLOSED
+}
+
+enum DocumentType {
+  ID
+  ADDRESSPROOF
+}
+
+enum NftType {
+  Standard
+  Platinum
+  Gold
+}
+
+enum NftTransactionType {
+  MINT
+  TRANSFER
+  LIST
+  LIST_CANCEL
+  SALE
+}
+
+enum BlockchainType {
+  Ethereum
+}
+
+enum EventType {
+  Virtual
+  Physical
+}
+
+enum NotificationStatus {
+  read
+  unRead
+}
