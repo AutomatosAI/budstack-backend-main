@@ -207,6 +207,11 @@ export class StrainService {
           isAvailable: true,
           isActive: true,
           stockQuantity: true,
+          expiryDate: true,
+          discount: true,
+          strainImages: {
+            select: { strainImageUrl: true, altText: true },
+          },
           prices: {
             select: {
               currency: true,
@@ -378,6 +383,9 @@ export class StrainService {
           feelings: true,
           popularity: true,
           helpsWith: true,
+          strainImages: {
+            select: { strainImageUrl: true, altText: true },
+          },
           prices: {
             select: {
               currency: true,
