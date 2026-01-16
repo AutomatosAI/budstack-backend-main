@@ -13,8 +13,8 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install --force
 
-# Install Prisma globally
-RUN npm install -g prisma
+# Install Prisma globally (version 5.2.0 compatible with Node 18)
+RUN npm install -g prisma@5.2.0
 
 # Copy the entire project
 COPY . .
