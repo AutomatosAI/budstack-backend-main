@@ -28,13 +28,19 @@ async function bootstrap() {
       validateCustomDecorators: true,
     })
   );
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      clientEmail: configService.get(CONSTANT.FIREBASE.CLIENT_EMAIL),
-      privateKey: configService.get(CONSTANT.FIREBASE.PRIVATE_KEY),
-      projectId: configService.get(CONSTANT.FIREBASE.PROJECT_ID),
-    }),
-  });
+  // Initialize Firebase only if valid credentials are provided
+  const firebasePrivateKey = configService.get(CONSTANT.FIREBASE.PRIVATE_KEY);
+  if (firebasePrivateKey && !firebasePrivateKey.includes('MOCK')) {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        clientEmail: configService.get(CONSTANT.FIREBASE.CLIENT_EMAIL),
+        privateKey: firebasePrivateKey.replace(/\\n/g, '\n'),
+        projectId: configService.get(CONSTANT.FIREBASE.PROJECT_ID),
+      }),
+    });
+  } else {
+    console.log('Firebase initialization skipped (mock credentials detected)');
+  }
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document);
   app.enableCors({
